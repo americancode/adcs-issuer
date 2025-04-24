@@ -32,8 +32,8 @@ COPY version/ version/
 #RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager main.go
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build  \
-		-ldflags "-s -w -X ${PROJECT}/version.Release=${VERSION} \
-		-X ${PROJECT}/version.Commit=${COMMIT} -X ${PROJECT}/version.BuildTime=${BUILD_TIME}" \
+		# -ldflags "-s -w -X ${PROJECT}/version.Release=${VERSION} \
+		# -X ${PROJECT}/version.Commit=${COMMIT} -X ${PROJECT}/version.BuildTime=${BUILD_TIME}" \
 		-o manager main.go
 
 # Use distroless as minimal base image to package the manager binary

@@ -38,8 +38,7 @@ func NewKerberosCertsrv(url, username, realm, password string, caCertPool *x509.
 	}
 
 	logger.Info("Creating Kerberos client...")
-	krbClient := client.NewWithPassword(username, realm, password, krb5Conf,
-		client.DisablePAFXFAST(true))
+	krbClient := client.NewWithPassword(username, realm, password, krb5Conf)
 
 	logger.Info("Authenticating with Kerberos...")
 	if err := krbClient.Login(); err != nil {

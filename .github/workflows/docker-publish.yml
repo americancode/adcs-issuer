@@ -9,11 +9,17 @@ on:
   # schedule:
   #   - cron: '43 11 * * *'
   push:
-    # branches: [ "master" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
-  # pull_request:
-  #   branches: [ "master" ]
+    # Trigger on tags following proper Semantic Versioning
+    # Examples of valid tags:
+    #   v1.0.0           -> stable release
+    #   v1.2.3-rc.1      -> release candidate
+    #   v0.1.0-beta.2    -> beta version
+    # Invalid tags (will fail Helm packaging):
+    #   test-v1.0.0      -> Helm does not accept "test-" prefix
+    #   version1.0.0     -> must start with 'v' followed by SemVer
+    tags:
+      - 'v*.*.*'        # matches stable versions like v0.0.1, v1.2.3
+      - 'v*.*.*-*'      # matches prerelease versions like v1.0.0-rc.1
 
 env:
   # Use docker.io for Docker Hub if empty

@@ -115,7 +115,7 @@ func (s *KerberosCertsrv) verifyKerberos() (bool, error) {
  */
 func (s *KerberosCertsrv) GetExistingCertificate(id string) (AdcsResponseStatus, string, string, error) {
 	log := log.Log.WithName("GetExistingCertificate")
-	certStatus := Unknown
+	var certStatus = Unknown
 
 	url := fmt.Sprintf("%s/%s?ReqID=%s&ENC=b64", s.url, certnew_cer, id)
 	if os.Getenv("ENABLE_DEBUG") == "true" {
@@ -198,7 +198,7 @@ func (s *KerberosCertsrv) GetExistingCertificate(id string) (AdcsResponseStatus,
 			return Ready, string(cert), id, nil
 		default:
 			err = fmt.Errorf("unexpected content type %s", ct)
-			log.Error(err, "Unexpected content type")
+			log.Error(err, "unexpected content type")
 			return certStatus, "", id, err
 		}
 	}
@@ -215,7 +215,7 @@ func (s *KerberosCertsrv) GetExistingCertificate(id string) (AdcsResponseStatus,
  */
 func (s *KerberosCertsrv) RequestCertificate(csr string, template string) (AdcsResponseStatus, string, string, error) {
 	log := log.Log.WithName("RequestCertificate").WithValues("template", template)
-	certStatus := Unknown
+	var certStatus = Unknown
 
 	log.V(1).Info("Starting certificate request")
 

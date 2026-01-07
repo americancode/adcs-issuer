@@ -28,6 +28,10 @@ spec:
         - maxSkew: 1
           topologyKey: "topology.kubernetes.io/zone"
           whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              control-plane: controller-manager
+              {{- include "chart.selectorLabels" . | nindent 14 }}
       {{- end }}
 
       {{- if .Values.controllerManager.nodeAffinity }}
@@ -62,6 +66,10 @@ spec:
             {{- end }}
           {{- end }}
           env:
+            {{- if .Values.controllerManager.kerberosAuthentication.enabled }}
+            - name: ADCS_AUTH_MODE
+              value: kerberos
+            {{- end }}
             - name: KUBERNETES_CLUSTER_DOMAIN
               value: {{ .Values.controllerManager.environment.KUBERNETES_CLUSTER_DOMAIN | quote }}
             - name: ENABLE_WEBHOOKS
@@ -107,6 +115,12 @@ spec:
               subPath: ca-certificates.crt
               readOnly: true
             {{- end }}
+            {{- if .Values.controllerManager.kerberosAuthentication.enabled }}
+            - mountPath: /etc/krb5.conf
+              name: krb5-config
+              subPath: krb5.conf
+              readOnly: true
+            {{- end }}
       terminationGracePeriodSeconds: 30
       securityContext:
         {{- toYaml .Values.controllerManager.securityContext | nindent 8 }}
@@ -123,6 +137,12 @@ spec:
           secret:
             defaultMode: 420
             secretName: {{ .Values.controllerManager.caCertsSecretName | default "ca-certificates" }}
+        {{- end }}
+        {{- if .Values.controllerManager.kerberosAuthentication.enabled }}
+        - name: krb5-config
+          configMap:
+            defaultMode: 420
+            name: {{ include "chart.fullname" . }}-krb5-config
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

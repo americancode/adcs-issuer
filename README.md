@@ -1,13 +1,7 @@
 # ADCS Issuer
 
-![Badge1](https://github.com/djkormo/adcs-issuer/actions/workflows/test.yaml/badge.svg) ![Badge2](https://github.com/djkormo/adcs-issuer/actions/workflows/codeql.yaml/badge.svg) ![Badge3](https://github.com/djkormo/adcs-issuer/actions/workflows/release.yaml/badge.svg) ![Badge4](https://github.com/djkormo/adcs-issuer/actions/workflows/helm-test.yaml/badge.svg) ![Badge5](https://github.com/djkormo/adcs-issuer/actions/workflows/helm-release.yaml/badge.svg)
 
-ADCS Issuer is a [Kubernetes](https://kubernetes.io/) [`cert-manager`](https://cert-manager.io)
-[`CertificateRequest`](https://cert-manager.io/docs/concepts/certificaterequest/) controller
-that uses [Microsoft Active Directory Certificate Services](https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/active-directory-certificate-services-overview)
-to sign certificate requests.
-
-It supports NTLM authentication.
+It supports NTLM and Kerberos authentication.
 
 This project is a community maintained fork of the [original implementation by Nokia](https://github.com/nokia/adcs-issuer/).
 

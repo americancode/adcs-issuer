@@ -7,7 +7,7 @@ ADCS Issuer is a [Kubernetes](https://kubernetes.io/) [`cert-manager`](https://c
 that uses [Microsoft Active Directory Certificate Services](https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/active-directory-certificate-services-overview)
 to sign certificate requests.
 
-It supports NTLM authentication.
+It supports NTLM and Kerberos authentication.
 
 This project is a community maintained fork of the [original implementation by Nokia](https://github.com/nokia/adcs-issuer/).
 

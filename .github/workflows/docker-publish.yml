@@ -115,6 +115,7 @@ jobs:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
           NAMESPACE: ${{ github.repository_owner }}
         run: |
+          helm dependency update charts/adcs-issuer
           helm package charts/adcs-issuer --version ${DOCKER_METADATA_OUTPUT_VERSION} --app-version ${DOCKER_METADATA_OUTPUT_VERSION}
           CHART_NAME=$(yq '.name' charts/adcs-issuer/Chart.yaml)
           helm push ${CHART_NAME}-${DOCKER_METADATA_OUTPUT_VERSION}.tgz oci://ghcr.io/${NAMESPACE}/helm-charts

@@ -46,6 +46,7 @@ jobs:
       # with sigstore/fulcio when running outside of PRs.
       id-token: write
       attestations: write
+      security-events: write
 
     steps:
       - name: Checkout repository
@@ -117,15 +118,40 @@ jobs:
           version: v0.74.0
 
       - name: Scan quarantine image
+        id: image-scan
         if: github.event_name != 'pull_request'
         env:
           QUARANTINE_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:quarantine-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           trivy image \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            --format table \
+            --image-src remote \
+            --scanners vuln \
+            --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
+            --pkg-types os,library \
+            --format json \
+            --output "${RUNNER_TEMP}/trivy-image.json" \
+            --exit-code 0 \
             "${QUARANTINE_IMAGE}"
+          trivy convert --format sarif \
+            --output "${RUNNER_TEMP}/trivy-image.sarif" \
+            "${RUNNER_TEMP}/trivy-image.json"
+          echo "sarif=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload image scan SARIF
+        if: ${{ always() && steps.image-scan.outputs.sarif == 'true' }}
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4
+        with:
+          sarif_file: ${{ runner.temp }}/trivy-image.sarif
+          category: trivy-image
+
+      - name: Enforce image vulnerability gate
+        env:
+          TRIVY_IMAGE_JSON: ${{ runner.temp }}/trivy-image.json
+        run: |
+          critical="$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' "${TRIVY_IMAGE_JSON}")"
+          high="$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' "${TRIVY_IMAGE_JSON}")"
+          echo "Image vulnerabilities: CRITICAL=${critical} HIGH=${high}"
+          (( critical == 0 && high == 0 ))
 
       - name: Promote scanned image to release tags
         if: github.event_name != 'pull_request'

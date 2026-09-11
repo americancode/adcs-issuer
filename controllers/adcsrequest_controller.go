@@ -99,14 +99,13 @@ func (r *AdcsRequestReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			combinedCert = append(cert, caCert...)
 		}
 		cr.Status.Certificate = combinedCert
+		cr.Status.CA = caCert
 
 		if log.V(5).Enabled() {
 			s := string(cert)
 			log.V(5).Info("certificate obtained", "certificate", s)
 		}
 
-		// CA cert is inside the cert above
-		// cr.Status.CA = caCert
 		err = r.CertificateRequestController.SetStatus(ctx, &cr, cmmeta.ConditionTrue, cmapi.CertificateRequestReasonIssued, "ADCS request successful")
 		if err != nil {
 			log.Error(err, "Failed request will be re-tried", "retry interval", issuer.RetryInterval)

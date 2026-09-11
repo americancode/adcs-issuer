@@ -30,7 +30,7 @@ type IssuerFactory struct {
 	AdcsTemplateName         string
 }
 
-func (f *IssuerFactory) GetIssuer(ctx context.Context, ref cmmeta.ObjectReference, namespace string) (*Issuer, error) {
+func (f *IssuerFactory) GetIssuer(ctx context.Context, ref cmmeta.IssuerReference, namespace string) (*Issuer, error) {
 	key := client.ObjectKey{Namespace: namespace, Name: ref.Name}
 
 	switch strings.ToLower(ref.Kind) {
@@ -59,6 +59,15 @@ func (f *IssuerFactory) getAdcsIssuer(ctx context.Context, key client.ObjectKey)
 	}
 
 	certs := issuer.Spec.CABundle
+	if issuer.Spec.CABundleRef.Name != "" {
+		refCerts, err := f.getCaBundle(ctx, issuer.Spec.CABundleRef.Name, issuer.Namespace)
+		if err == nil {
+			certs = refCerts
+		}
+		if len(certs) == 0 {
+			certs = issuer.Spec.CABundle
+		}
+	}
 	if len(certs) == 0 {
 		return nil, fmt.Errorf("CA Bundle required")
 	}
@@ -123,6 +132,15 @@ func (f *IssuerFactory) getClusterAdcsIssuer(ctx context.Context, key client.Obj
 	}
 
 	certs := issuer.Spec.CABundle
+	if issuer.Spec.CABundleRef.Name != "" {
+		refCerts, err := f.getCaBundle(ctx, issuer.Spec.CABundleRef.Name, f.ClusterResourceNamespace)
+		if err == nil {
+			certs = refCerts
+		}
+		if len(certs) == 0 {
+			certs = issuer.Spec.CABundle
+		}
+	}
 	if len(certs) == 0 {
 		return nil, fmt.Errorf("CA Bundle required")
 	}
@@ -205,4 +223,17 @@ func (f *IssuerFactory) getUserPassword(ctx context.Context, secretName string, 
 	}
 
 	return string(secret.Data["username"]), string(secret.Data["password"]), string(secret.Data["realm"]), nil
+}
+
+func (f *IssuerFactory) getCaBundle(ctx context.Context, secretName string, namespace string) ([]byte, error) {
+	secret := new(corev1.Secret)
+	if err := f.Get(ctx, client.ObjectKey{Namespace: namespace, Name: secretName}, secret); err != nil {
+		return nil, err
+	}
+
+	caBundle, ok := secret.Data["ca.crt"]
+	if !ok {
+		return nil, fmt.Errorf("ca.crt not set in secret")
+	}
+	return caBundle, nil
 }

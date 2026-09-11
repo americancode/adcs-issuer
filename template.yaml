@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-    controller-gen.kubebuilder.io/version: v0.8.0
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: adcsissuers.adcs.certmanager.csf.nokia.com
 spec:
   conversion:
@@ -43,10 +43,20 @@ spec:
             description: AdcsIssuerSpec defines the desired state of AdcsIssuer
             properties:
               caBundle:
-                description: CABundle is a PEM encoded TLS certifiate to use to verify
+                description: CABundle is a PEM encoded TLS certificate to use to verify
                   connections to the ADCS server.
                 format: byte
                 type: string
+              caBundleRef:
+                description: CABundleRef is a reference to a Secret containing the CA bundle for the
+                  ADCS server. The Secret must contain a `ca.crt` key.
+                properties:
+                  name:
+                    description: Name of the referent.
+                    type: string
+                required:
+                - name
+                type: object
               credentialsRef:
                 description: CredentialsRef is a reference to a Secret containing
                   the username and password for the ADCS server. The secret must contain
@@ -97,7 +107,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-    controller-gen.kubebuilder.io/version: v0.8.0
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: adcsrequests.adcs.certmanager.csf.nokia.com
 spec:
   conversion:
@@ -209,7 +219,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-    controller-gen.kubebuilder.io/version: v0.8.0
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: clusteradcsissuers.adcs.certmanager.csf.nokia.com
 spec:
   conversion:
@@ -249,10 +259,20 @@ spec:
             description: ClusterAdcsIssuerSpec defines the desired state of ClusterAdcsIssuer
             properties:
               caBundle:
-                description: CABundle is a PEM encoded TLS certifiate to use to verify
+                description: CABundle is a PEM encoded TLS certificate to use to verify
                   connections to the ADCS server.
                 format: byte
                 type: string
+              caBundleRef:
+                description: CABundleRef is a reference to a Secret containing the CA bundle for the
+                  ADCS server. The Secret must contain a `ca.crt` key.
+                properties:
+                  name:
+                    description: Name of the referent.
+                    type: string
+                required:
+                - name
+                type: object
               credentialsRef:
                 description: CredentialsRef is a reference to a Secret containing
                   the username and password for the ADCS server. The secret must contain
@@ -310,7 +330,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-    controller-gen.kubebuilder.io/version: v0.8.0
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: adcsissuers.adcs.certmanager.csf.nokia.com
 spec:
   conversion:
@@ -350,10 +370,20 @@ spec:
             description: AdcsIssuerSpec defines the desired state of AdcsIssuer
             properties:
               caBundle:
-                description: CABundle is a PEM encoded TLS certifiate to use to verify
+                description: CABundle is a PEM encoded TLS certificate to use to verify
                   connections to the ADCS server.
                 format: byte
                 type: string
+              caBundleRef:
+                description: CABundleRef is a reference to a Secret containing the CA bundle for the
+                  ADCS server. The Secret must contain a `ca.crt` key.
+                properties:
+                  name:
+                    description: Name of the referent.
+                    type: string
+                required:
+                - name
+                type: object
               credentialsRef:
                 description: CredentialsRef is a reference to a Secret containing
                   the username and password for the ADCS server. The secret must contain
@@ -404,7 +434,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-    controller-gen.kubebuilder.io/version: v0.8.0
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: adcsrequests.adcs.certmanager.csf.nokia.com
 spec:
   conversion:
@@ -516,7 +546,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-    controller-gen.kubebuilder.io/version: v0.8.0
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: clusteradcsissuers.adcs.certmanager.csf.nokia.com
 spec:
   conversion:
@@ -556,10 +586,20 @@ spec:
             description: ClusterAdcsIssuerSpec defines the desired state of ClusterAdcsIssuer
             properties:
               caBundle:
-                description: CABundle is a PEM encoded TLS certifiate to use to verify
+                description: CABundle is a PEM encoded TLS certificate to use to verify
                   connections to the ADCS server.
                 format: byte
                 type: string
+              caBundleRef:
+                description: CABundleRef is a reference to a Secret containing the CA bundle for the
+                  ADCS server. The Secret must contain a `ca.crt` key.
+                properties:
+                  name:
+                    description: Name of the referent.
+                    type: string
+                required:
+                - name
+                type: object
               credentialsRef:
                 description: CredentialsRef is a reference to a Secret containing
                   the username and password for the ADCS server. The secret must contain

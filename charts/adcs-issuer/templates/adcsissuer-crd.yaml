@@ -5,7 +5,8 @@ metadata:
   name: adcsissuers.adcs.certmanager.csf.nokia.com
   annotations:
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "chart.fullname" . }}-
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.21.0
+    helm.sh/resource-policy: keep
   labels:
   {{- include "chart.labels" . | nindent 4 }}
 spec:
@@ -37,8 +38,19 @@ spec:
           spec:
             description: AdcsIssuerSpec defines the desired state of AdcsIssuer
             properties:
+              caBundleRef:
+                description: CABundleRef is a reference to a secret containing
+                  the ca bundle for the ADCS server. This secret must contain
+                  the 'ca.crt' key
+                properties:
+                  name:
+                    description: Name of the referent.
+                    type: string
+                required:
+                - name
+                type: object
               caBundle:
-                description: CABundle is a PEM encoded TLS certifiate to use to verify
+                description: CABundle is a PEM encoded TLS certificate to use to verify
                   connections to the ADCS server.
                 format: byte
                 type: string

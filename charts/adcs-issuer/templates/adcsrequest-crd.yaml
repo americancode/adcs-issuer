@@ -5,7 +5,8 @@ metadata:
   name: adcsrequests.adcs.certmanager.csf.nokia.com
   annotations:
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "chart.fullname" . }}-
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.21.0
+    helm.sh/resource-policy: keep
   labels:
   {{- include "chart.labels" . | nindent 4 }}
 spec:

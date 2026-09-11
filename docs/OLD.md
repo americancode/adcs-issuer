@@ -70,6 +70,8 @@ spec:
 
 The `caBundle` parameter is BASE64-encoded CA certificate which is used by the ADCS server itself, which may not be the same certificate that will be used to sign your request.
 
+Alternatively, `caBundleRef.name` may reference a Secret containing the CA certificate in its `ca.crt` key. Existing `caBundle` configurations remain supported.
+
 The `statusCheckInterval` indicates how often the status of the request should be tested. Typically, it can take a few hours or even days before the certificate is issued.
 
 The `retryInterval` says how long to wait before retrying requests that errored.

@@ -7,7 +7,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	adcsv1 "github.com/djkormo/adcs-issuer/api/v1"
+	adcsv1 "github.com/americancode/adcs-issuer/api/v1"
 )
 
 // AdcsIssuerReconciler reconciles a AdcsIssuer object

@@ -14,16 +14,16 @@ Build statuses:
 
 
 
-[![Code scanning - action](https://github.com/djkormo/adcs-issuer/actions/workflows/codeql.yaml/badge.svg)](https://github.com/djkormo/adcs-issuer/actions/workflows/codeql.yaml)
+[![Code scanning - action](https://github.com/americancode/adcs-issuer/actions/workflows/codeql.yaml/badge.svg)](https://github.com/americancode/adcs-issuer/actions/workflows/codeql.yaml)
 
 
-[![Publish Docker image on Release](https://github.com/djkormo/adcs-issuer/actions/workflows/main.yml/badge.svg)](https://github.com/djkormo/adcs-issuer/actions/workflows/main.yml)
+[![Publish Docker image on Release](https://github.com/americancode/adcs-issuer/actions/workflows/main.yml/badge.svg)](https://github.com/americancode/adcs-issuer/actions/workflows/main.yml)
 
 
-[![Release helm charts](https://github.com/djkormo/adcs-issuer/actions/workflows/helm-chart-releaser.yaml/badge.svg)](https://github.com/djkormo/adcs-issuer/actions/workflows/helm-chart-releaser.yaml)
+[![Release helm charts](https://github.com/americancode/adcs-issuer/actions/workflows/helm-chart-releaser.yaml/badge.svg)](https://github.com/americancode/adcs-issuer/actions/workflows/helm-chart-releaser.yaml)
 
 
-[![Golang lint issuer](https://github.com/djkormo/adcs-issuer/actions/workflows/golangci-lint.yaml/badge.svg)](https://github.com/djkormo/adcs-issuer/actions/workflows/golangci-lint.yaml)
+[![Golang lint issuer](https://github.com/americancode/adcs-issuer/actions/workflows/golangci-lint.yaml/badge.svg)](https://github.com/americancode/adcs-issuer/actions/workflows/golangci-lint.yaml)
 
 
 
@@ -31,7 +31,7 @@ Build statuses:
 
 ===========================
 
-https://djkormo.github.io/adcs-issuer/
+https://americancode.github.io/adcs-issuer/
 
 ===========================
 
@@ -70,7 +70,7 @@ spec:
 
 The `caBundle` parameter is BASE64-encoded CA certificate which is used by the ADCS server itself, which may not be the same certificate that will be used to sign your request.
 
-Alternatively, `caBundleRef.name` may reference a Secret containing the CA certificate in its `ca.crt` key. Existing `caBundle` configurations remain supported.
+Alternatively, `caBundleRef` may reference a Secret or ConfigMap. `name` is required, while `kind` defaults to `Secret` and `key` defaults to `ca.crt`; both Secret and ConfigMap data keys can be customized. Use `keys` to concatenate multiple certificate entries in order. Existing `caBundle` configurations remain supported.
 
 The `statusCheckInterval` indicates how often the status of the request should be tested. Typically, it can take a few hours or even days before the certificate is issued.
 
@@ -282,14 +282,14 @@ kubectl apply -R -f manifests -n cert-manager
 
 kubectl -n cert-manager logs deploy/adcs-issuer-controller-manager -c manager 
 
-make build IMG="docker.io/djkormo/adcs-issuer:dev"
+make build IMG="docker.io/americancode/adcs-issuer:dev"
 
-make docker-build docker-push IMG="docker.io/djkormo/adcs-issuer:dev"
+make docker-build docker-push IMG="docker.io/americancode/adcs-issuer:dev"
 
-docker build . -t docker.io/djkormo/adcs-issuer:dev
+docker build . -t docker.io/americancode/adcs-issuer:dev
 
-docker login docker.io/djkormo
-docker push docker.io/djkormo/adcs-issuer:dev
+docker login docker.io/americancode
+docker push docker.io/americancode/adcs-issuer:dev
 
 
 

@@ -27,7 +27,7 @@ controllerManager:
   # Image settings for the ADCS Issuer manager.
   manager:
     image:
-      repository: djkormo/adcs-issuer  # The repository for the ADCS Issuer Docker image.
+      repository: americancode/adcs-issuer  # The repository for the ADCS Issuer Docker image.
       tag: 2.2.1                       # The tag for the ADCS Issuer Docker image.
       imagePullPolicy: Always          # The image pull policy.
     
@@ -202,7 +202,7 @@ simulator:
   # @section Image
   # Image settings for the ADCS Simulator.
   image:
-    repository: djkormo/adcs-sim              # The repository for the ADCS Simulator Docker image.
+    repository: americancode/adcs-sim              # The repository for the ADCS Simulator Docker image.
     tag: 0.0.6                                # The tag for the ADCS Simulator Docker image.
     imagePullPolicy: Always          # The image pull policy.
 

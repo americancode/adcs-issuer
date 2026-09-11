@@ -23,6 +23,12 @@ rules:
       - list
       - watch
   - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+  - apiGroups:
       - adcs.certmanager.csf.nokia.com
     resources:
       - adcsissuers

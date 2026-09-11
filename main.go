@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"time"
 
+	adcsv1 "github.com/americancode/adcs-issuer/api/v1"
+	"github.com/americancode/adcs-issuer/controllers"
+	"github.com/americancode/adcs-issuer/healthcheck"
+	"github.com/americancode/adcs-issuer/issuers"
+	"github.com/americancode/adcs-issuer/version"
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
-	adcsv1 "github.com/djkormo/adcs-issuer/api/v1"
-	"github.com/djkormo/adcs-issuer/controllers"
-	"github.com/djkormo/adcs-issuer/healthcheck"
-	"github.com/djkormo/adcs-issuer/issuers"
-	"github.com/djkormo/adcs-issuer/version"
 
 	zaplogfmt "github.com/sykesm/zap-logfmt"
 	uzap "go.uber.org/zap"

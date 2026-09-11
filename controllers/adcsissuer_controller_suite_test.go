@@ -10,7 +10,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	"github.com/djkormo/adcs-issuer/issuers"
+	"github.com/americancode/adcs-issuer/issuers"
 )
 
 // newTestManager creates a manager against the envtest API server with the

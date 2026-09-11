@@ -1,6 +1,6 @@
 # ADCS Issuer
 
-![Badge1](https://github.com/djkormo/adcs-issuer/actions/workflows/test.yaml/badge.svg) ![Badge2](https://github.com/djkormo/adcs-issuer/actions/workflows/codeql.yaml/badge.svg) ![Badge3](https://github.com/djkormo/adcs-issuer/actions/workflows/release.yaml/badge.svg) ![Badge4](https://github.com/djkormo/adcs-issuer/actions/workflows/helm-test.yaml/badge.svg) ![Badge5](https://github.com/djkormo/adcs-issuer/actions/workflows/helm-release.yaml/badge.svg) [![trivy](https://github.com/djkormo/adcs-issuer/actions/workflows/trivy.yml/badge.svg)](https://github.com/djkormo/adcs-issuer/actions/workflows/trivy.yml) 
+![Badge1](https://github.com/americancode/adcs-issuer/actions/workflows/test.yaml/badge.svg) ![Badge2](https://github.com/americancode/adcs-issuer/actions/workflows/codeql.yaml/badge.svg) ![Badge3](https://github.com/americancode/adcs-issuer/actions/workflows/release.yaml/badge.svg) ![Badge4](https://github.com/americancode/adcs-issuer/actions/workflows/helm-test.yaml/badge.svg) ![Badge5](https://github.com/americancode/adcs-issuer/actions/workflows/helm-release.yaml/badge.svg) [![trivy](https://github.com/americancode/adcs-issuer/actions/workflows/trivy.yml/badge.svg)](https://github.com/americancode/adcs-issuer/actions/workflows/trivy.yml) 
 
 ADCS Issuer is a [Kubernetes](https://kubernetes.io/) [`cert-manager`](https://cert-manager.io)
 [`CertificateRequest`](https://cert-manager.io/docs/concepts/certificaterequest/) controller
@@ -17,7 +17,7 @@ TODO: a short summary of installing and configuring the issuer
 
 ## Documentation
 
-Detailed documentation can be found in the [docs folder](./docs/README.md) or on [GitHub Pages](https://djkormo.github.io/adcs-issuer).
+Detailed documentation can be found in the [docs folder](./docs/README.md) or on [GitHub Pages](https://americancode.github.io/adcs-issuer).
 
 ## License
 

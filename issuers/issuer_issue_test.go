@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/djkormo/adcs-issuer/adcs"
-	api "github.com/djkormo/adcs-issuer/api/v1"
+	"github.com/americancode/adcs-issuer/adcs"
+	api "github.com/americancode/adcs-issuer/api/v1"
 )
 
 // validSelfSignedCert is a small self-signed x509 certificate in PEM format,

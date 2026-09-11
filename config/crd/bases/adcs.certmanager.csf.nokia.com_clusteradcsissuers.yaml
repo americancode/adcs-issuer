@@ -47,9 +47,29 @@ spec:
                 type: string
               caBundleRef:
                 description: |-
-                  CABundleRef is a reference to a Secret containing the CA bundle for the
-                  ADCS server. The Secret must contain a `ca.crt` key.
+                  CABundleRef is a reference to a Secret or ConfigMap containing the CA
+                  bundle for the ADCS server. Kind defaults to Secret and key defaults to
+                  `ca.crt`.
                 properties:
+                  key:
+                    description: Key in the referent containing the PEM-encoded CA
+                      bundle.
+                    type: string
+                  keys:
+                    description: |-
+                      Keys in the referent containing PEM-encoded CA certificates. Values are
+                      concatenated in the listed order. If set, Keys takes precedence over Key.
+                    items:
+                      type: string
+                    minItems: 1
+                    type: array
+                  kind:
+                    description: Kind of the referent. Supported values are Secret
+                      and ConfigMap.
+                    enum:
+                    - Secret
+                    - ConfigMap
+                    type: string
                   name:
                     description: Name of the referent.
                     type: string

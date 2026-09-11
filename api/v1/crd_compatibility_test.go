@@ -44,6 +44,20 @@ func TestIssuerCRDsPreserveLegacyCABundleSchema(t *testing.T) {
 			if ref["type"] != "object" {
 				t.Fatalf("caBundleRef should be an object: %#v", ref)
 			}
+			refProperties := ref["properties"].(map[string]any)
+			for _, field := range []string{"name", "kind", "key"} {
+				if _, ok := refProperties[field]; !ok {
+					t.Fatalf("caBundleRef.%s is missing", field)
+				}
+			}
+			kind := refProperties["kind"].(map[string]any)
+			if kind["type"] != "string" {
+				t.Fatalf("caBundleRef.kind should be a string: %#v", kind)
+			}
+			keys := refProperties["keys"].(map[string]any)
+			if keys["type"] != "array" || keys["minItems"] != 1 {
+				t.Fatalf("caBundleRef.keys should be a non-empty array: %#v", keys)
+			}
 			if _, ok := ref["required"]; !ok {
 				t.Fatal("caBundleRef.name must remain required when the reference is supplied")
 			}

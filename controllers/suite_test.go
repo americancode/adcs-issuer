@@ -22,8 +22,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	adcsv1 "github.com/americancode/adcs-issuer/api/v1"
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
-	adcsv1 "github.com/djkormo/adcs-issuer/api/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"

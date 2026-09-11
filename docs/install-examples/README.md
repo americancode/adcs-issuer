@@ -33,13 +33,13 @@ helm install \
 ### add helm repo
 
 ```
-helm repo add djkormo-adcs-issuer https://djkormo.github.io/adcs-issuer/
+helm repo add americancode-adcs-issuer https://americancode.github.io/adcs-issuer/
 ```
 
 ### update
 
 ``` 
-helm repo update djkormo-adcs-issuer
+helm repo update americancode-adcs-issuer
 ```
 
 ### check all versions 
@@ -51,7 +51,7 @@ helm search repo adcs-issuer  --versions
 ### install in cert-manager namespace
 
 ```console 
-helm install adcs-issuer  djkormo-adcs-issuer/adcs-issuer --version 2.0.8 \
+helm install adcs-issuer  americancode-adcs-issuer/adcs-issuer --version 2.0.8 \
   --namespace cert-manager --values values-cert-manager-namespace.yaml  --create-namespace
 ```
 
@@ -65,7 +65,7 @@ kubectl -n cert-manager logs deploy/adcs-issuer-controller-manager
 ### install adcs issuer in adcs-issuer namespace
 
 ```console 
-helm install adcs-issuer  djkormo-adcs-issuer/adcs-issuer --version 2.0.8 \
+helm install adcs-issuer  americancode-adcs-issuer/adcs-issuer --version 2.0.8 \
   --namespace adcs-issuer --values values-adcs-issuer-namespace.yaml --create-namespace
 ```
 

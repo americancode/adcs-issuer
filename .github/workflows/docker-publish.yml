@@ -96,7 +96,7 @@ jobs:
             VERSION=${{ steps.meta.outputs.version }}
             COMMIT=${{ github.sha }}
             BUILD_TIME=${{ github.run_started_at }}
-            PROJECT=github.com/djkormo/adcs-issuer
+            PROJECT=github.com/americancode/adcs-issuer
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: mode=max

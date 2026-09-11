@@ -25,10 +25,11 @@ type ClusterAdcsIssuerSpec struct {
 	// +optional
 	CABundle []byte `json:"caBundle,omitempty"`
 
-	// CABundleRef is a reference to a Secret containing the CA bundle for the
-	// ADCS server. The Secret must contain a `ca.crt` key.
+	// CABundleRef is a reference to a Secret or ConfigMap containing the CA
+	// bundle for the ADCS server. Kind defaults to Secret and key defaults to
+	// `ca.crt`.
 	// +optional
-	CABundleRef LocalObjectReference `json:"caBundleRef,omitempty"`
+	CABundleRef CABundleReference `json:"caBundleRef,omitempty"`
 
 	// How often to check for request status in the server (in time.ParseDuration() format)
 	// Default 6 hours.

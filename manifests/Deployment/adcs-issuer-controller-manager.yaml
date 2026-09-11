@@ -23,7 +23,7 @@ spec:
         - --disable-approved-check=false
         command:
         - /manager
-        image: djkormo/adcs-issuer:dev
+        image: americancode/adcs-issuer:dev
         env:
         - name: ENABLE_WEBHOOKS
           value: "false"  

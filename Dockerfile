@@ -5,7 +5,7 @@ FROM docker.io/library/golang:1.27.1 AS builder
 ARG VERSION=dev
 ARG COMMIT
 ARG BUILD_TIME
-ARG PROJECT=github.com/djkormo/adcs-issuer
+ARG PROJECT=github.com/americancode/adcs-issuer
 
 WORKDIR /workspace
 

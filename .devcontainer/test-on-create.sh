@@ -133,7 +133,7 @@ helm install \
 
 ### add adcs issuer chart repo
 
-helm repo add djkormo-adcs-issuer https://djkormo.github.io/adcs-issuer/ --force-update
+helm repo add americancode-adcs-issuer https://americancode.github.io/adcs-issuer/ --force-update
 
 ### check all versions 
 

@@ -20,7 +20,7 @@ spec:
         - --port=8443
         command:
         - /usr/local/adcs-sim/manager
-        image: djkormo/adcs-sim:0.0.5
+        image: americancode/adcs-sim:0.0.5
         imagePullPolicy: Always
         env:
         - name: ENABLE_DEBUG

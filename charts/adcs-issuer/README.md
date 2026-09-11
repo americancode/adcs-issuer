@@ -11,12 +11,12 @@ ADCS Issuer plugin for cert-manager.
 - **App Version:** ![AppVersion: 2.2.0](https://img.shields.io/badge/AppVersion-2.2.0-informational?style=flat-square)
 - **Chart Type:** ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-**Homepage:** <https://github.com/djkormo/adcs-issuer>
+**Homepage:** <https://github.com/americancode/adcs-issuer>
 
 ## Source Code
 
-* <https://github.com/djkormo/adcs-issuer>
-* <https://djkormo.github.io/adcs-issuer/>
+* <https://github.com/americancode/adcs-issuer>
+* <https://americancode.github.io/adcs-issuer/>
 
 ## CRD lifecycle
 
@@ -30,6 +30,11 @@ CRD installation is enabled by default with `crd.install: true`. Set it to
 `false` only when the CRDs are installed and managed separately. The CRDs are
 marked with `helm.sh/resource-policy: keep`, so uninstalling the chart leaves
 the CRDs and existing custom resources in place.
+
+`spec.caBundleRef.name` may reference either a Secret or ConfigMap. The
+optional `kind` field defaults to `Secret`, and the optional `key` field
+defaults to `ca.crt`. Use the optional `keys` list to concatenate multiple
+PEM-encoded certificate entries in order; `keys` takes precedence over `key`.
 
 ## Requirements
 
@@ -64,7 +69,7 @@ Kubernetes: `>=1.27.0-0`
 | controllerManager.kerberosAuthentication.enabled | bool | `false` |  |
 | controllerManager.kerberosAuthentication.krb5Config | string | `"[libdefaults]\n  default_realm = EXAMPLE.COM\n  dns_lookup_kdc = true\n\n[realms]\n  EXAMPLE.COM  = {\n    kdc = dc01.example.com\n  }\n\n[domain_realm]\n  .example.com = EXAMPLE.COM\n  example.com = EXAMPLE.COM\n"` |  |
 | controllerManager.manager.image.imagePullPolicy | string | `"Always"` |  |
-| controllerManager.manager.image.repository | string | `"djkormo/adcs-issuer"` |  |
+| controllerManager.manager.image.repository | string | `"americancode/adcs-issuer"` |  |
 | controllerManager.manager.image.tag | string | `"2.2.1"` |  |
 | controllerManager.manager.livenessProbe.httpGet.path | string | `"/healthz"` |  |
 | controllerManager.manager.livenessProbe.httpGet.port | int | `8081` |  |
@@ -121,7 +126,7 @@ Kubernetes: `>=1.27.0-0`
 | simulator.exampleCertificate.enabled | bool | `true` |  |
 | simulator.exampleCertificate.name | string | `"adcs-sim-certificate"` |  |
 | simulator.image.imagePullPolicy | string | `"Always"` |  |
-| simulator.image.repository | string | `"djkormo/adcs-sim"` |  |
+| simulator.image.repository | string | `"americancode/adcs-sim"` |  |
 | simulator.image.tag | string | `"0.0.6"` |  |
 | simulator.issuerGroup | string | `"cert-manager.io"` |  |
 | simulator.issuerKind | string | `"Issuer"` |  |

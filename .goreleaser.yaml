@@ -35,8 +35,8 @@ kos:
   - id: adcs-issuer
     bare: true
     repositories:
-      - docker.io/djkormo/adcs-issuer
-      - ghcr.io/djkormo/adcs-issuer
+      - docker.io/americancode/adcs-issuer
+      - ghcr.io/americancode/adcs-issuer
     platforms:
       - linux/amd64
       - linux/arm64
@@ -46,7 +46,7 @@ kos:
     annotations:
       # https://github.com/opencontainers/image-spec/blob/main/annotations.md
       org.opencontainers.image.created: "{{.CommitTimestamp}}"
-      org.opencontainers.image.authors: djkormo
+      org.opencontainers.image.authors: americancode
       org.opencontainers.image.source: "https://{{.ModulePath}}"
       org.opencontainers.image.version: "{{.Tag}}"
       org.opencontainers.image.revision: "{{.Commit}}"

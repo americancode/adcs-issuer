@@ -12,7 +12,7 @@ ENVTEST_K8S_VERSION = 1.31.0
 COMMIT?=$(shell git rev-parse --short HEAD)
 BUILD_TIME?=$(shell date -u '+%Y-%m-%d_%H:%M:%S')
 
-PROJECT?=github.com/djkormo/adcs-issuer
+PROJECT?=github.com/americancode/adcs-issuer
 
 # Trivy severity level and output format
 TRIVY_SEVERITY ?= CRITICAL,HIGH

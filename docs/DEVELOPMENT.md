@@ -72,7 +72,7 @@ Get the server.pem / root.pem certificate for the adcs-issuer to authenticate ag
 Encode the certificate to base64 and in one line, for caBundle.
 > cat <<EOF | base64 -w 0
 
-For production configurations, the CA can instead be stored in a Secret and referenced with `spec.caBundleRef.name`; the Secret must contain the PEM-encoded certificate under `ca.crt`. The existing inline `spec.caBundle` field remains supported.
+For production configurations, the CA can instead be stored in a Secret or ConfigMap and referenced with `spec.caBundleRef`. The reference requires `name`; `kind` defaults to `Secret` and `key` defaults to `ca.crt`. For separate root and issuing certificate entries, use `keys` instead of `key`; values are concatenated in order. The existing inline `spec.caBundle` field remains supported.
 
 ## (Cluster) ADCS-Issuer
 

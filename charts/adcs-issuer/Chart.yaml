@@ -4,10 +4,10 @@ description: ADCS Issuer plugin for cert-manager.
 type: application
 version: 2.2.1
 appVersion: "2.2.1"
-home: https://github.com/djkormo/adcs-issuer
+home: https://github.com/americancode/adcs-issuer
 sources:
-  - https://github.com/djkormo/adcs-issuer
-  - https://djkormo.github.io/adcs-issuer/
+  - https://github.com/americancode/adcs-issuer
+  - https://americancode.github.io/adcs-issuer/
 kubeVersion: ">=1.27.0-0"
 
 dependencies:

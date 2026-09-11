@@ -27,7 +27,7 @@ spec:
         - /manager
         args:
         - --enable-leader-election
-        image: djkormo/adcs-issuer:dev
+        image: americancode/adcs-issuer:dev
         name: manager
         resources:
           limits:

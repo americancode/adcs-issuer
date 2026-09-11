@@ -4,7 +4,7 @@ crd:
 controllerManager:
   manager:
     image:
-      repository: djkormo/adcs-issuer
+      repository: americancode/adcs-issuer
       tag: 2.0.8
     resources:
       limits:

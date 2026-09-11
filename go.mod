@@ -1,4 +1,4 @@
-module github.com/djkormo/adcs-issuer
+module github.com/americancode/adcs-issuer
 
 go 1.27.0
 

@@ -24,8 +24,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	api "github.com/djkormo/adcs-issuer/api/v1"
-	"github.com/djkormo/adcs-issuer/issuers"
+	api "github.com/americancode/adcs-issuer/api/v1"
+	"github.com/americancode/adcs-issuer/issuers"
 )
 
 const (

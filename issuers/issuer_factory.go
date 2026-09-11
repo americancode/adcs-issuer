@@ -14,8 +14,8 @@ import (
 
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
 
-	"github.com/djkormo/adcs-issuer/adcs"
-	api "github.com/djkormo/adcs-issuer/api/v1"
+	"github.com/americancode/adcs-issuer/adcs"
+	api "github.com/americancode/adcs-issuer/api/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -60,7 +60,7 @@ func (f *IssuerFactory) getAdcsIssuer(ctx context.Context, key client.ObjectKey)
 
 	certs := issuer.Spec.CABundle
 	if issuer.Spec.CABundleRef.Name != "" {
-		refCerts, err := f.getCaBundle(ctx, issuer.Spec.CABundleRef.Name, issuer.Namespace)
+		refCerts, err := f.getCaBundle(ctx, issuer.Spec.CABundleRef, issuer.Namespace)
 		if err == nil {
 			certs = refCerts
 		}
@@ -133,7 +133,7 @@ func (f *IssuerFactory) getClusterAdcsIssuer(ctx context.Context, key client.Obj
 
 	certs := issuer.Spec.CABundle
 	if issuer.Spec.CABundleRef.Name != "" {
-		refCerts, err := f.getCaBundle(ctx, issuer.Spec.CABundleRef.Name, f.ClusterResourceNamespace)
+		refCerts, err := f.getCaBundle(ctx, issuer.Spec.CABundleRef, f.ClusterResourceNamespace)
 		if err == nil {
 			certs = refCerts
 		}
@@ -204,6 +204,7 @@ func getInterval(specValue string, def string, log logr.Logger) time.Duration {
 }
 
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get
 
 func (f *IssuerFactory) getUserPassword(ctx context.Context, secretName string, namespace string) (string, string, string, error) {
 	secret := new(corev1.Secret)
@@ -225,15 +226,51 @@ func (f *IssuerFactory) getUserPassword(ctx context.Context, secretName string, 
 	return string(secret.Data["username"]), string(secret.Data["password"]), string(secret.Data["realm"]), nil
 }
 
-func (f *IssuerFactory) getCaBundle(ctx context.Context, secretName string, namespace string) ([]byte, error) {
-	secret := new(corev1.Secret)
-	if err := f.Get(ctx, client.ObjectKey{Namespace: namespace, Name: secretName}, secret); err != nil {
-		return nil, err
+func (f *IssuerFactory) getCaBundle(ctx context.Context, ref api.CABundleReference, namespace string) ([]byte, error) {
+	kind := ref.Kind
+	if kind == "" {
+		kind = "Secret"
+	}
+	key := ref.Key
+	keys := ref.Keys
+	if len(keys) == 0 && key == "" {
+		key = "ca.crt"
+	}
+	if len(keys) == 0 {
+		keys = []string{key}
 	}
 
-	caBundle, ok := secret.Data["ca.crt"]
-	if !ok {
-		return nil, fmt.Errorf("ca.crt not set in secret")
+	objectKey := client.ObjectKey{Namespace: namespace, Name: ref.Name}
+	switch strings.ToLower(kind) {
+	case "secret":
+		secret := new(corev1.Secret)
+		if err := f.Get(ctx, objectKey, secret); err != nil {
+			return nil, err
+		}
+		var caBundle []byte
+		for _, key := range keys {
+			value, ok := secret.Data[key]
+			if !ok {
+				return nil, fmt.Errorf("%s not set in Secret %s", key, ref.Name)
+			}
+			caBundle = append(caBundle, value...)
+		}
+		return caBundle, nil
+	case "configmap":
+		configMap := new(corev1.ConfigMap)
+		if err := f.Get(ctx, objectKey, configMap); err != nil {
+			return nil, err
+		}
+		var caBundle []byte
+		for _, key := range keys {
+			value, ok := configMap.Data[key]
+			if !ok {
+				return nil, fmt.Errorf("%s not set in ConfigMap %s", key, ref.Name)
+			}
+			caBundle = append(caBundle, value...)
+		}
+		return caBundle, nil
+	default:
+		return nil, fmt.Errorf("unsupported CA bundle reference kind %q", ref.Kind)
 	}
-	return caBundle, nil
 }

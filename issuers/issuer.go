@@ -14,8 +14,8 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/djkormo/adcs-issuer/adcs"
-	api "github.com/djkormo/adcs-issuer/api/v1"
+	"github.com/americancode/adcs-issuer/adcs"
+	api "github.com/americancode/adcs-issuer/api/v1"
 	"github.com/fullsailor/pkcs7"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"

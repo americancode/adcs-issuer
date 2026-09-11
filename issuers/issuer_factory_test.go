@@ -14,8 +14,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	api "github.com/americancode/adcs-issuer/api/v1"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
-	api "github.com/djkormo/adcs-issuer/api/v1"
 )
 
 // validCABundle is a small self-signed x509 certificate in PEM format, valid
@@ -72,30 +72,56 @@ func validSecret(name, namespace string) *corev1.Secret {
 	}
 }
 
-func TestGetCaBundleReadsCACRT(t *testing.T) {
+func TestGetCaBundleDefaultsToSecretCACRT(t *testing.T) {
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: "default"},
 		Data:       map[string][]byte{"ca.crt": []byte(validCABundle)},
 	}
 	f := newTestFactory(t, secret)
 
-	ca, err := f.getCaBundle(context.Background(), "ca", "default")
+	ca, err := f.getCaBundle(context.Background(), api.CABundleReference{Name: "ca"}, "default")
 
 	assert.NoError(t, err)
 	assert.Equal(t, []byte(validCABundle), ca)
 }
 
-func TestGetCaBundleRequiresCACRT(t *testing.T) {
+func TestGetCaBundleSupportsCustomSecretKey(t *testing.T) {
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: "default"},
+		Data:       map[string][]byte{"bundle.pem": []byte(validCABundle)},
+	}
+	f := newTestFactory(t, secret)
+
+	ca, err := f.getCaBundle(context.Background(), api.CABundleReference{Name: "ca", Key: "bundle.pem"}, "default")
+
+	assert.NoError(t, err)
+	assert.Equal(t, []byte(validCABundle), ca)
+}
+
+func TestGetCaBundleRequiresConfiguredKey(t *testing.T) {
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: "default"},
 		Data:       map[string][]byte{"tls.crt": []byte(validCABundle)},
 	}
 	f := newTestFactory(t, secret)
 
-	ca, err := f.getCaBundle(context.Background(), "ca", "default")
+	ca, err := f.getCaBundle(context.Background(), api.CABundleReference{Name: "ca"}, "default")
 
 	assert.Nil(t, ca)
-	assert.EqualError(t, err, "ca.crt not set in secret")
+	assert.EqualError(t, err, "ca.crt not set in Secret ca")
+}
+
+func TestGetCaBundleSupportsConfigMap(t *testing.T) {
+	configMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{Name: "ca", Namespace: "default"},
+		Data:       map[string]string{"root.pem": validCABundle, "issuing.pem": validCABundle},
+	}
+	f := newTestFactory(t, configMap)
+
+	ca, err := f.getCaBundle(context.Background(), api.CABundleReference{Name: "ca", Kind: "ConfigMap", Keys: []string{"root.pem", "issuing.pem"}}, "default")
+
+	assert.NoError(t, err)
+	assert.Equal(t, []byte(validCABundle+validCABundle), ca)
 }
 
 func TestGetAdcsIssuerUsesCABundleRef(t *testing.T) {
@@ -104,7 +130,7 @@ func TestGetAdcsIssuerUsesCABundleRef(t *testing.T) {
 		Spec: api.AdcsIssuerSpec{
 			URL:            "https://adcs.example.com",
 			CredentialsRef: api.LocalObjectReference{Name: "creds"},
-			CABundleRef:    api.LocalObjectReference{Name: "ca"},
+			CABundleRef:    api.CABundleReference{Name: "ca"},
 		},
 	}
 	credentials := validSecret("creds", "default")

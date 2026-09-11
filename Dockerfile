@@ -1,5 +1,7 @@
 # Build the manager binary
-FROM docker.io/library/golang:1.27.1 AS builder
+ARG BUILDPLATFORM
+ARG TARGETPLATFORM
+FROM --platform=${BUILDPLATFORM} docker.io/library/golang:1.27.1 AS builder
 
 
 ARG VERSION=dev
@@ -41,7 +43,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} GO111MODUL
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
+FROM --platform=${TARGETPLATFORM} gcr.io/distroless/static:nonroot
 WORKDIR /
 
 COPY --from=builder /workspace/manager .

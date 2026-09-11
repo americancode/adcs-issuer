@@ -14,12 +14,16 @@ on:
     #   v1.0.0           -> stable release
     #   v1.2.3-rc.1      -> release candidate
     #   v0.1.0-beta.2    -> beta version
+    #   1.0.0           -> stable release without a v prefix
+    #   1.2.3-rc.1      -> release candidate without a v prefix
     # Invalid tags (will fail Helm packaging):
     #   test-v1.0.0      -> Helm does not accept "test-" prefix
-    #   version1.0.0     -> must start with 'v' followed by SemVer
+    #   version1.0.0     -> not a valid SemVer tag
     tags:
       - 'v*.*.*'        # matches stable versions like v0.0.1, v1.2.3
       - 'v*.*.*-*'      # matches prerelease versions like v1.0.0-rc.1
+      - '*.*.*'         # matches stable versions like 0.0.1, 1.2.3
+      - '*.*.*-*'       # matches prerelease versions like 1.0.0-rc.1
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -80,6 +84,10 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a141130b2 # v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
+          tags: |
+            type=semver,pattern={{version}},value=${{ github.ref_name }}
 
       # Build and push only a quarantine tag. Final release tags are created
       # after the image vulnerability gate passes.
@@ -160,10 +168,9 @@ jobs:
 
       - name: Push Helm chart to GHCR
         env:
-          # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-          DIGEST: ${{ steps.build-and-push.outputs.digest }}
           NAMESPACE: ${{ github.repository_owner }}
         run: |
-          helm package charts/adcs-issuer --version ${DOCKER_METADATA_OUTPUT_VERSION} --app-version ${DOCKER_METADATA_OUTPUT_VERSION}
+          VERSION="${GITHUB_REF_NAME#v}"
+          helm package charts/adcs-issuer --version "${VERSION}" --app-version "${VERSION}"
           CHART_NAME=$(awk '$1 == "name:" { print $2; exit }' charts/adcs-issuer/Chart.yaml)
-          helm push ${CHART_NAME}-${DOCKER_METADATA_OUTPUT_VERSION}.tgz oci://ghcr.io/${NAMESPACE}/helm-charts
+          helm push "${CHART_NAME}-${VERSION}.tgz" oci://ghcr.io/${NAMESPACE}/helm-charts

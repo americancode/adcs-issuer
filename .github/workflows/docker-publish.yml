@@ -279,6 +279,14 @@ jobs:
             "${IMAGE}@${ARM64_DIGEST}"
           digest="$(docker buildx imagetools inspect "${IMAGE}:${VERSION}" | awk '/^Digest:/ { print $2; exit }')"
           test -n "${digest}"
+          if [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            docker buildx imagetools create \
+              --tag "${IMAGE}:latest" \
+              "${IMAGE}@${digest}"
+            echo "latest=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "latest=false" >> "${GITHUB_OUTPUT}"
+          fi
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
           echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
 
@@ -287,7 +295,11 @@ jobs:
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           VERSION: ${{ steps.promote.outputs.version }}
           DIGEST: ${{ steps.promote.outputs.digest }}
-        run: cosign sign --yes "${IMAGE}:${VERSION}@${DIGEST}"
+        run: |
+          cosign sign --yes "${IMAGE}:${VERSION}@${DIGEST}"
+          if [[ "${{ steps.promote.outputs.latest }}" == "true" ]]; then
+            cosign sign --yes "${IMAGE}:latest@${DIGEST}"
+          fi
 
       - name: Set up Helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1

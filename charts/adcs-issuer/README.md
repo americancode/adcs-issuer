@@ -18,6 +18,19 @@ ADCS Issuer plugin for cert-manager.
 * <https://github.com/djkormo/adcs-issuer>
 * <https://djkormo.github.io/adcs-issuer/>
 
+## CRD lifecycle
+
+The chart keeps the three ADCS Issuer CRDs in `templates/` rather than Helm's
+special `crds/` directory. Helm installs files in `crds/` before the rest of a
+release, but deliberately does not upgrade or delete them. Keeping these CRDs
+as templates allows `helm upgrade` to apply additive schema changes such as
+`spec.caBundleRef`.
+
+CRD installation is enabled by default with `crd.install: true`. Set it to
+`false` only when the CRDs are installed and managed separately. The CRDs are
+marked with `helm.sh/resource-policy: keep`, so uninstalling the chart leaves
+the CRDs and existing custom resources in place.
+
 ## Requirements
 
 Kubernetes: `>=1.27.0-0`
@@ -73,6 +86,7 @@ Kubernetes: `>=1.27.0-0`
 | controllerManager.rbac.enabled | bool | `true` |  |
 | controllerManager.rbac.serviceAccountName | string | `"adcs-issuer"` |  |
 | controllerManager.replicas | int | `1` |  |
+| controllerManager.priorityClassName | string | `null` |  |
 | controllerManager.securityContext.runAsUser | int | `1000` |  |
 | crd.install | bool | `true` |  |
 | metricsService.enabled | bool | `true` |  |

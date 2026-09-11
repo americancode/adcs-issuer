@@ -1,11 +1,11 @@
 # Build the manager binary
-FROM docker.io/library/golang:1.25.5 as builder
+FROM docker.io/library/golang:1.27.1 AS builder
 
 
-ARG VERSION 
+ARG VERSION=dev
 ARG COMMIT
 ARG BUILD_TIME
-ARG PROJECT 
+ARG PROJECT=github.com/djkormo/adcs-issuer
 
 WORKDIR /workspace
 
@@ -31,12 +31,15 @@ COPY version/ version/
 # Build
 #RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager main.go
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build  \
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build \
+		-ldflags "-s -w -X ${PROJECT}/version.Release=${VERSION} \
+		-X ${PROJECT}/version.Commit=${COMMIT} -X ${PROJECT}/version.BuildTime=${BUILD_TIME}" \
 		-o manager main.go
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot 
+FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 
 COPY --from=builder /workspace/manager .

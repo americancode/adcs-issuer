@@ -46,4 +46,3 @@ dist/
 
 kubeconfig
 all-*.yaml
-Chart.lock

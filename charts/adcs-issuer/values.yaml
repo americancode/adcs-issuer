@@ -111,6 +111,10 @@ controllerManager:
   securityContext:
     runAsUser: 1000                           # User ID to run the container as.
 
+  # @section Priority Class
+  # Defines the priority class for the controller manager pods.
+  priorityClassName: null
+
   # @section Affinity
   # Affinity settings for scheduling the controller manager pods.
   affinity:

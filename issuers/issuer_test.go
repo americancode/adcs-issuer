@@ -1,11 +1,10 @@
 package issuers
 
 import (
-	"fmt"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -13,17 +12,12 @@ var (
 	log = ctrl.Log.WithName("issuer_test")
 )
 
-// TODO: provide proper PKCS7 certificates for testing.
-// TODO: create makefile to populate testdata (openssl)
-// 2 tests will fail!
-// testdata/pkcs7.pem and testdata/x509.pem aren't provided, for the tests to be able to run, please provide own certs of these format.
-
 func TestParsingCaCertShouldReturnX509(t *testing.T) {
 	// arrange
-	pkcs7Pem, err := os.ReadFile("testdata/pkcs7.pem")
+	pkcs7Pem, err := os.ReadFile("testdata/cfss_rawPKCS7.p7b")
 	assert.NoError(t, err)
 
-	validX509Certificate, err := os.ReadFile("testdata/x509.pem")
+	validX509Certificate, err := os.ReadFile("testdata/cfss_outputx509.pem")
 	assert.NoError(t, err)
 	// act
 
@@ -94,12 +88,8 @@ func TestParseCaCertCorrectPKCS7(t *testing.T) {
 
 func TestCorrectX509Cert(t *testing.T) {
 	// arrange
-	// raw format pkcs7.p7b from cfss testdata (https://github.com/cloudflare/cfssl/tree/master/helpers/testdata)
-	x509, err := os.ReadFile("testdata/x509.pem")
-
-	if err != nil {
-		fmt.Println("TestCorrectX509Cert")
-	}
+	x509, err := os.ReadFile("testdata/cfss_outputx509.pem")
+	assert.NoError(t, err)
 	// act
 
 	parsedCaCert, err := parseCaCert(x509, log)

@@ -24,7 +24,7 @@ type AdcsRequestSpec struct {
 	// If the Issuer does not exist, processing will be retried.
 	// If the Issuer is not an 'ADCS' Issuer, an error will be returned and the
 	// ADCSRequest will be marked as failed.
-	IssuerRef cmmeta.ObjectReference `json:"issuerRef"`
+	IssuerRef cmmeta.IssuerReference `json:"issuerRef"`
 }
 
 // AdcsRequestStatus defines the observed state of AdcsRequest

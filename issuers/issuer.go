@@ -97,6 +97,9 @@ func (i *Issuer) Issue(ctx context.Context, ar *api.AdcsRequest) ([]byte, []byte
 	if err != nil {
 		return nil, nil, err
 	}
+	if len(certChain) == 0 {
+		return nil, nil, errors.New("unable to get cert-chain from cert server")
+	}
 
 	// Parse and encode the certificateChain to a valid x509 certificate.
 	ca, err := parseCaCert([]byte(certChain), log)
@@ -104,6 +107,9 @@ func (i *Issuer) Issue(ctx context.Context, ar *api.AdcsRequest) ([]byte, []byte
 	if err != nil {
 		log.Error(err, "something went wrong parsing to x509")
 		return nil, nil, err
+	}
+	if len(ca) == 0 {
+		return nil, nil, errors.New("cacert empty after parsing x509")
 	}
 
 	if log.V(4).Enabled() {
@@ -160,13 +166,17 @@ func tryParseX509(block *pem.Block) ([]byte, error) {
 	}
 
 	b, err := pkcs7.Parse(block.Bytes)
-	if err == nil {
-		if len(b.Certificates) == 0 {
-			return nil, fmt.Errorf("expected one or more certificates")
-		}
-		return b.Certificates[0].Raw, nil
+	if err != nil {
+		return nil, fmt.Errorf("parsing PKCS7: %w", err)
 	}
 
-	err = fmt.Errorf("parsing PKCS7: %w", err)
-	return nil, err
+	if len(b.Certificates) == 0 {
+		return nil, fmt.Errorf("expected one or more certificates")
+	}
+	for _, certificate := range b.Certificates {
+		if len(certificate.Raw) != 0 {
+			return certificate.Raw, nil
+		}
+	}
+	return nil, fmt.Errorf("expected at least one certificate to have a value")
 }

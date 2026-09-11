@@ -1,34 +1,16 @@
 name: Docker
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 on:
-  # schedule:
-  #   - cron: '43 11 * * *'
   push:
-    # Trigger on tags following proper Semantic Versioning
-    # Examples of valid tags:
-    #   v1.0.0           -> stable release
-    #   v1.2.3-rc.1      -> release candidate
-    #   v0.1.0-beta.2    -> beta version
-    #   1.0.0           -> stable release without a v prefix
-    #   1.2.3-rc.1      -> release candidate without a v prefix
-    # Invalid tags (will fail Helm packaging):
-    #   test-v1.0.0      -> Helm does not accept "test-" prefix
-    #   version1.0.0     -> not a valid SemVer tag
+    # Accept both v1.2.3 and 1.2.3, including prereleases.
     tags:
-      - 'v*.*.*'        # matches stable versions like v0.0.1, v1.2.3
-      - 'v*.*.*-*'      # matches prerelease versions like v1.0.0-rc.1
-      - '*.*.*'         # matches stable versions like 0.0.1, 1.2.3
-      - '*.*.*-*'       # matches prerelease versions like 1.0.0-rc.1
+      - 'v*.*.*'
+      - 'v*.*.*-*'
+      - '*.*.*'
+      - '*.*.*-*'
 
 env:
-  # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
 
 concurrency:
@@ -36,92 +18,58 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-
+  build-amd64:
+    name: Build and scan amd64 quarantine image
     runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     permissions:
       contents: read
       packages: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
-      id-token: write
-      attestations: write
       security-events: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
 
-      # Install the cosign tool except on PR
-      # https://github.com/sigstore/cosign-installer
-      - name: Install cosign
-        if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
-        with:
-          cosign-release: 'v2.4.1'
-
-      # Set up BuildKit Docker container builder to be able to build
-      # multi-platform images and export cache
-      # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
-      - name: Log into registry ${{ env.REGISTRY }}
-        if: github.event_name != 'pull_request'
+      - name: Log into registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Extract metadata (tags, labels) for Docker
-      # https://github.com/docker/metadata-action
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=false
-          tags: |
-            type=semver,pattern={{version}},value=${{ github.ref_name }}
-
-      # Build and push only a quarantine tag. Final release tags are created
-      # after the image vulnerability gate passes.
-      # https://github.com/docker/build-push-action
-      - name: Build quarantine Docker image
-        id: build-quarantine
+      - name: Build amd64 quarantine image
+        id: build
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:quarantine-${{ github.run_id }}-${{ github.run_attempt }}
-          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:quarantine-${{ github.run_id }}-${{ github.run_attempt }}-amd64
           build-args: |
-            VERSION=${{ steps.meta.outputs.version }}
+            VERSION=${{ github.ref_name }}
             COMMIT=${{ github.sha }}
             BUILD_TIME=${{ github.run_started_at }}
             PROJECT=github.com/americancode/adcs-issuer
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=adcs-issuer-amd64
+          cache-to: type=gha,mode=max,scope=adcs-issuer-amd64
           provenance: mode=max
           sbom: true
 
       - name: Set up Trivy
-        if: github.event_name != 'pull_request'
         uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
         with:
           version: v0.74.0
 
-      - name: Scan quarantine image
-        id: image-scan
-        if: github.event_name != 'pull_request'
+      - name: Scan amd64 quarantine image
+        id: scan
         env:
-          QUARANTINE_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:quarantine-${{ github.run_id }}-${{ github.run_attempt }}
+          QUARANTINE_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:quarantine-${{ github.run_id }}-${{ github.run_attempt }}-amd64
         run: |
           trivy image \
             --image-src remote \
@@ -129,56 +77,174 @@ jobs:
             --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
             --pkg-types os,library \
             --format json \
-            --output "${RUNNER_TEMP}/trivy-image.json" \
+            --output "${RUNNER_TEMP}/trivy-image-amd64.json" \
             --exit-code 0 \
             "${QUARANTINE_IMAGE}"
           trivy convert --format sarif \
-            --output "${RUNNER_TEMP}/trivy-image.sarif" \
-            "${RUNNER_TEMP}/trivy-image.json"
+            --output "${RUNNER_TEMP}/trivy-image-amd64.sarif" \
+            "${RUNNER_TEMP}/trivy-image-amd64.json"
           echo "sarif=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Upload image scan SARIF
-        if: ${{ always() && steps.image-scan.outputs.sarif == 'true' }}
+      - name: Upload amd64 image scan SARIF
+        if: ${{ always() && steps.scan.outputs.sarif == 'true' }}
         uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4
         with:
-          sarif_file: ${{ runner.temp }}/trivy-image.sarif
-          category: trivy-image
+          sarif_file: ${{ runner.temp }}/trivy-image-amd64.sarif
+          category: trivy-image-amd64
 
-      - name: Enforce image vulnerability gate
+      - name: Enforce amd64 image vulnerability gate
         env:
-          TRIVY_IMAGE_JSON: ${{ runner.temp }}/trivy-image.json
+          TRIVY_IMAGE_JSON: ${{ runner.temp }}/trivy-image-amd64.json
         run: |
           critical="$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' "${TRIVY_IMAGE_JSON}")"
           high="$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' "${TRIVY_IMAGE_JSON}")"
-          echo "Image vulnerabilities: CRITICAL=${critical} HIGH=${high}"
+          echo "amd64 image vulnerabilities: CRITICAL=${critical} HIGH=${high}"
           (( critical == 0 && high == 0 ))
 
-      - name: Promote scanned image to release tags
-        if: github.event_name != 'pull_request'
-        env:
-          FINAL_TAGS: ${{ steps.meta.outputs.tags }}
-          QUARANTINE_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:quarantine-${{ github.run_id }}-${{ github.run_attempt }}
-        run: |
-          while IFS= read -r final_tag; do
-            if [[ -n "${final_tag}" ]]; then
-              docker buildx imagetools create --tag "${final_tag}" "${QUARANTINE_IMAGE}"
-            fi
-          done <<< "${FINAL_TAGS}"
+  build-arm64:
+    name: Build and scan arm64 quarantine image
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
-      # Sign the resulting Docker image digest except on PRs.
-      # This will only write to the public Rekor transparency log when the Docker
-      # repository is public to avoid leaking data.  If you would like to publish
-      # transparency data even for private images, pass --force to cosign below.
-      # https://github.com/sigstore/cosign
-      - name: Sign the published Docker image
-        if: ${{ github.event_name != 'pull_request' }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Log into registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569f # v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build arm64 quarantine image
+        id: build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:quarantine-${{ github.run_id }}-${{ github.run_attempt }}-arm64
+          build-args: |
+            VERSION=${{ github.ref_name }}
+            COMMIT=${{ github.sha }}
+            BUILD_TIME=${{ github.run_started_at }}
+            PROJECT=github.com/americancode/adcs-issuer
+          cache-from: type=gha,scope=adcs-issuer-arm64
+          cache-to: type=gha,mode=max,scope=adcs-issuer-arm64
+          provenance: mode=max
+          sbom: true
+
+      - name: Set up Trivy
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: v0.74.0
+
+      - name: Scan arm64 quarantine image
+        id: scan
         env:
-          # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-          TAGS: ${{ steps.meta.outputs.tags }}
-          DIGEST: ${{ steps.build-quarantine.outputs.digest }}
-        # This step uses the identity token to provision an ephemeral certificate
-        # against the sigstore community Fulcio instance.
-        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+          QUARANTINE_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:quarantine-${{ github.run_id }}-${{ github.run_attempt }}-arm64
+        run: |
+          trivy image \
+            --image-src remote \
+            --scanners vuln \
+            --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
+            --pkg-types os,library \
+            --format json \
+            --output "${RUNNER_TEMP}/trivy-image-arm64.json" \
+            --exit-code 0 \
+            "${QUARANTINE_IMAGE}"
+          trivy convert --format sarif \
+            --output "${RUNNER_TEMP}/trivy-image-arm64.sarif" \
+            "${RUNNER_TEMP}/trivy-image-arm64.json"
+          echo "sarif=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload arm64 image scan SARIF
+        if: ${{ always() && steps.scan.outputs.sarif == 'true' }}
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4
+        with:
+          sarif_file: ${{ runner.temp }}/trivy-image-arm64.sarif
+          category: trivy-image-arm64
+
+      - name: Enforce arm64 image vulnerability gate
+        env:
+          TRIVY_IMAGE_JSON: ${{ runner.temp }}/trivy-image-arm64.json
+        run: |
+          critical="$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' "${TRIVY_IMAGE_JSON}")"
+          high="$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' "${TRIVY_IMAGE_JSON}")"
+          echo "arm64 image vulnerabilities: CRITICAL=${critical} HIGH=${high}"
+          (( critical == 0 && high == 0 ))
+
+  publish:
+    name: Promote image and publish chart
+    runs-on: ubuntu-latest
+    needs: [build-amd64, build-arm64]
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Log into registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569f # v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: v2.4.1
+
+      - name: Promote scanned images to the release manifest
+        id: promote
+        env:
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          AMD64_DIGEST: ${{ needs.build-amd64.outputs.digest }}
+          ARM64_DIGEST: ${{ needs.build-arm64.outputs.digest }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          VERSION="${REF_NAME#v}"
+          if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Release tag must be pure semver with an optional v prefix: ${REF_NAME}" >&2
+            exit 1
+          fi
+          docker buildx imagetools create \
+            --tag "${IMAGE}:${VERSION}" \
+            "${IMAGE}@${AMD64_DIGEST}" \
+            "${IMAGE}@${ARM64_DIGEST}"
+          digest="$(docker buildx imagetools inspect "${IMAGE}:${VERSION}" | awk '/^Digest:/ { print $2; exit }')"
+          test -n "${digest}"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
+
+      - name: Sign promoted image
+        env:
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          VERSION: ${{ steps.promote.outputs.version }}
+          DIGEST: ${{ steps.promote.outputs.digest }}
+        run: cosign sign --yes "${IMAGE}:${VERSION}@${DIGEST}"
 
       - name: Set up Helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
@@ -189,14 +255,11 @@ jobs:
           helm repo update jetstack
           helm dependency build charts/adcs-issuer
 
-      - name: Enable OCI support
-        run: helm registry login ghcr.io -u ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }}
-
       - name: Push Helm chart to GHCR
         env:
           NAMESPACE: ${{ github.repository_owner }}
+          VERSION: ${{ steps.promote.outputs.version }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
           CHART_PACKAGE="$(helm package charts/adcs-issuer --version "${VERSION}" --app-version "${VERSION}" | sed -n 's/^Successfully packaged chart and saved it to: //p' | tr -d '\r')"
           test -n "${CHART_PACKAGE}"
           test -f "${CHART_PACKAGE}"

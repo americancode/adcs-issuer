@@ -1,6 +1,6 @@
 # ADCS Issuer
 
-![Badge1](https://github.com/americancode/adcs-issuer/actions/workflows/test.yaml/badge.svg) ![Badge2](https://github.com/americancode/adcs-issuer/actions/workflows/codeql.yaml/badge.svg) ![Badge3](https://github.com/americancode/adcs-issuer/actions/workflows/release.yaml/badge.svg) ![Badge4](https://github.com/americancode/adcs-issuer/actions/workflows/helm-test.yaml/badge.svg) ![Badge5](https://github.com/americancode/adcs-issuer/actions/workflows/helm-release.yaml/badge.svg) [![trivy](https://github.com/americancode/adcs-issuer/actions/workflows/trivy.yml/badge.svg)](https://github.com/americancode/adcs-issuer/actions/workflows/trivy.yml) 
+[![CI](https://github.com/americancode/adcs-issuer/actions/workflows/ci.yml/badge.svg)](https://github.com/americancode/adcs-issuer/actions/workflows/ci.yml) [![CodeQL](https://github.com/americancode/adcs-issuer/actions/workflows/codeql.yml/badge.svg)](https://github.com/americancode/adcs-issuer/actions/workflows/codeql.yml) [![Docker](https://github.com/americancode/adcs-issuer/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/americancode/adcs-issuer/actions/workflows/docker-publish.yml)
 
 ADCS Issuer is a [Kubernetes](https://kubernetes.io/) [`cert-manager`](https://cert-manager.io)
 [`CertificateRequest`](https://cert-manager.io/docs/concepts/certificaterequest/) controller

@@ -41,7 +41,6 @@ minikube_downloads/
 /adcs-sim
 /deploy.env
 
-# Added by goreleaser init:
 dist/
 
 kubeconfig

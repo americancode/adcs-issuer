@@ -197,6 +197,7 @@ jobs:
           NAMESPACE: ${{ github.repository_owner }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          helm package charts/adcs-issuer --version "${VERSION}" --app-version "${VERSION}"
-          CHART_NAME=$(awk '$1 == "name:" { print $2; exit }' charts/adcs-issuer/Chart.yaml)
-          helm push "${CHART_NAME}-${VERSION}.tgz" oci://ghcr.io/${NAMESPACE}/helm-charts
+          CHART_PACKAGE="$(helm package charts/adcs-issuer --version "${VERSION}" --app-version "${VERSION}" | sed -n 's/^Successfully packaged chart and saved it to: //p' | tr -d '\r')"
+          test -n "${CHART_PACKAGE}"
+          test -f "${CHART_PACKAGE}"
+          helm push "${CHART_PACKAGE}" "oci://ghcr.io/${NAMESPACE}/helm-charts"

@@ -117,6 +117,7 @@ jobs:
         run: |
           trivy image \
             --image-src remote \
+            --platform linux/amd64 \
             --scanners vuln \
             --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
             --pkg-types os,library \
@@ -200,6 +201,7 @@ jobs:
         run: |
           trivy image \
             --image-src remote \
+            --platform linux/arm64 \
             --scanners vuln \
             --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
             --pkg-types os,library \

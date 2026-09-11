@@ -6,6 +6,8 @@ ARG VERSION=dev
 ARG COMMIT
 ARG BUILD_TIME
 ARG PROJECT=github.com/americancode/adcs-issuer
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /workspace
 
@@ -32,7 +34,7 @@ COPY version/ version/
 #RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager main.go
 
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build \
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} GO111MODULE=on go build \
 		-ldflags "-s -w -X ${PROJECT}/version.Release=${VERSION} \
 		-X ${PROJECT}/version.Commit=${COMMIT} -X ${PROJECT}/version.BuildTime=${BUILD_TIME}" \
 		-o manager main.go

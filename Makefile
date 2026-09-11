@@ -134,35 +134,6 @@ docker-build-nc: ## Build docker image with the manager.
 	$(CONTAINER_TOOL)  build --no-cache -t $(APP_NAME) . --progress=plain --build-arg VERSION=${VERSION} --build-arg  COMMIT=${COMMIT} --build-arg BUILD_TIME=${BUILD_TIME} --build-arg PROJECT=${PROJECT}
 
 
-# Docker publish
-.PHONY: docker-publish
-docker-publish: docker-repo-login docker-publish-latest docker-publish-version ## Publish the `{version}` ans `latest` tagged containers to ECR
-
-.PHONY: docker-publish-latest
-docker-publish-latest: docker-tag-latest ## Publish the `latest` taged container to ECR
-	@echo 'publish latest to $(DOCKER_REPO)'
-	$(CONTAINER_TOOL)  push $(DOCKER_REPO)/$(APP_NAME):latest
-
-.PHONY: docker-publish-version
-docker-publish-version: docker-tag-version ## Publish the `{version}` taged container to ECR
-	@echo 'publish $(VERSION) to $(DOCKER_REPO)'
-	$(CONTAINER_TOOL)  push $(DOCKER_REPO)/$(APP_NAME):$(VERSION)
-
-# Docker tagging
-.PHONY: docker-tag
-docker-tag: docker-tag-latest docker-tag-version ## Generate container tags for the `{version}` ans `latest` tags
-
-.PHONY: docker-tag-latest
-docker-tag-latest: ## Generate container `{version}` tag
-	@echo 'create tag latest'
-	$(CONTAINER_TOOL)  tag $(APP_NAME) $(DOCKER_REPO)/$(APP_NAME):latest
-
-.PHONY: docker-tag-versaion
-docker-tag-version: ## Generate container `latest` tag
-	@echo 'create tag $(VERSION)'
-	$(CONTAINER_TOOL)  tag $(APP_NAME) $(DOCKER_REPO)/$(APP_NAME):$(VERSION)
-
-
 .PHONY: docker-inspect
 docker-inspect: ## Generate container `latest` tag
 	@echo 'inspect $(APP_NAME)'
@@ -173,11 +144,6 @@ docker-inspect: ## Generate container `latest` tag
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
 	$(CONTAINER_TOOL) push ${IMG}
-
-
-.PHONY: docker-repo-login
-docker-repo-login: ## Login to repo
-	$(CONTAINER_TOOL) login	
 
 
 .PHONY: trivy-scan ## Use trivy scan

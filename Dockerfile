@@ -1,7 +1,7 @@
 # Build the manager binary
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
-FROM --platform=${BUILDPLATFORM} docker.io/library/golang:1.27.1 AS builder
+FROM --platform=${BUILDPLATFORM} docker.io/library/golang:1.27.2 AS builder
 
 
 ARG VERSION=dev
